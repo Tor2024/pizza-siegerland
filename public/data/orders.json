@@ -267,9 +267,9 @@
     "total": 38.35,
     "paymentMethod": "cash",
     "deliveryTime": "asap",
-    "status": "received",
+    "status": "done",
     "createdAt": 1777748609457,
-    "updatedAt": 1777748609457
+    "updatedAt": 1777798493905
   },
   {
     "id": "ord_1777798445283_nwjhcfpol",
