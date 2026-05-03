@@ -5,6 +5,23 @@ import { findUserByEmail, addUser, addOrderToUser } from '@/lib/userStorage';
 // In-memory cache for fast access
 const orderCache = new Map<string, any>();
 
+// Helper to get Google Maps API key
+async function getGoogleMapsApiKey(): Promise<string | null> {
+  try {
+    const { getMenuFromGitHub } = await import('@/lib/githubMenuStorage');
+    const menuData = await getMenuFromGitHub();
+    if (menuData?.settings?.googleMapsApiKey) {
+      return menuData.settings.googleMapsApiKey;
+    }
+  } catch (e) {
+    console.log('Could not load menu settings for API key');
+  }
+  return process.env.GOOGLE_MAPS_API_KEY || null;
+}
+
+// Pizzeria address as default origin for directions
+const PIZZERIA_ADDRESS = 'Kölner Tor 1, Siegen, Germany';
+
 // POST - создать заказ (для клиентов)
 export async function POST(req: Request) {
   try {
@@ -24,7 +41,71 @@ export async function POST(req: Request) {
     }
 
     const orderId = `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+    const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code;
+    
+    // Validate address using Google Maps API
+    let addressValid = true;
+    let addressMessage = '';
+    let customerCoords = null;
+    let deliveryRoute = null;
+    
+    try {
+      const apiKey = await getGoogleMapsApiKey();
+      if (apiKey) {
+        // Step 1: Validate address and get coordinates
+        const encodedAddress = encodeURIComponent(orderData.customer.address);
+        const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}&components=country:de&language=de`;
+        const geoResponse = await fetch(geocodeUrl);
+        const geoData = await geoResponse.json();
+        
+        if (geoData.status === 'OK' && geoData.results?.length > 0) {
+          const result = geoData.results[0];
+          const { lat, lng } = result.geometry.location;
+          
+          // Strict validation: check if address has street number
+          const hasStreetNumber = result.address_components.some((comp: any) => 
+            comp.types.includes('street_number')
+          );
+          
+          if (!hasStreetNumber) {
+            addressValid = false;
+            addressMessage = 'Bitte geben Sie eine genaue Adresse mit Hausnummer an.';
+          } else {
+            customerCoords = { lat, lng, formatted_address: result.formatted_address };
+            
+            // Step 2: Get directions from pizzeria to customer
+            const directionsParams = new URLSearchParams({
+              origin: PIZZERIA_ADDRESS,
+              destination: `${lat},${lng}`,
+              mode: 'driving',
+              key: apiKey,
+              language: 'de'
+            });
+            const directionsUrl = `https://maps.googleapis.com/maps/api/directions/json?${directionsParams.toString()}`;
+            const dirResponse = await fetch(directionsUrl);
+            const dirData = await dirResponse.json();
+            
+            if (dirData.status === 'OK' && dirData.routes?.length > 0) {
+              const route = dirData.routes[0];
+              const leg = route.legs[0];
+              deliveryRoute = {
+                duration: leg.duration, // { text: "15 mins", value: 900 }
+                distance: leg.distance,
+                start_address: leg.start_address,
+                end_address: leg.end_address,
+                maps_url: `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(PIZZERIA_ADDRESS)}&destination=${encodeURIComponent(result.formatted_address)}&travelmode=driving`
+              };
+            }
+          }
+        } else {
+          addressValid = false;
+          addressMessage = 'Die Adresse konnte nicht gefunden werden. Bitte überprüfen Sie die Eingabe.';
+        }
+      }
+    } catch (addressError) {
+      console.error('Address validation error:', addressError);
+      // Continue with order even if validation fails
+    }
     
       const newOrder: any = {
         id: orderId,
@@ -41,8 +122,13 @@ export async function POST(req: Request) {
         ],
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        estimatedDelivery: orderData.estimatedDelivery || '25-35 min',
-        confirmationCode: confirmationCode
+        estimatedDelivery: deliveryRoute?.duration?.text || orderData.estimatedDelivery || '25-35 min',
+        confirmationCode: confirmationCode,
+        // Address validation results
+        addressValid,
+        addressMessage: addressValid ? undefined : addressMessage,
+        customerCoords,
+        deliveryRoute
       };
 
     // Сохраняем заказ в GitHub (persistent) и cache

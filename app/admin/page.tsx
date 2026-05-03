@@ -83,6 +83,16 @@ interface Order {
   promoDiscount?: number;
   confirmedAt?: number;
   confirmationToken?: string;
+  addressValid?: boolean;
+  addressMessage?: string;
+  customerCoords?: { lat: number; lng: number; formatted_address?: string };
+  deliveryRoute?: {
+    duration?: { text: string; value: number };
+    distance?: { text: string; value: number };
+    start_address?: string;
+    end_address?: string;
+    maps_url?: string;
+  };
 }
 
 export default function AdminDashboard() {
@@ -784,6 +794,47 @@ export default function AdminDashboard() {
                           )}
                           {order.deliveryTime && (
                             <p className={`text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>🕐 {order.deliveryTime === 'asap' ? 'Schnellstmöglich' : order.deliveryTime}</p>
+                          )}
+                          {/* Address validation status */}
+                          {order.addressValid === false && (
+                            <p className={`text-sm text-red-400`}>
+                              ⚠️ Adresse nicht verifiziert: {order.addressMessage}
+                            </p>
+                          )}
+                          {order.addressValid === true && (
+                            <p className={`text-sm text-green-400`}>
+                              ✅ Adresse verifiziert
+                            </p>
+                          )}
+                          {/* Delivery route info */}
+                          {order.deliveryRoute && (
+                            <div className={`mt-2 p-3 rounded-lg ${isDarkMode ? 'bg-blue-900/20' : 'bg-blue-50'}`}>
+                              <p className={`text-sm font-semibold ${isDarkMode ? 'text-blue-400' : 'text-blue-600'} mb-1`}>
+                                🚚 Lieferroute
+                              </p>
+                              <p className={`text-xs ${isDarkMode ? 'text-white/60' : 'text-gray-600'}`}>
+                                ⏱ Voraussichtliche Lieferzeit: <strong>{order.deliveryRoute.duration?.text || 'Unbekannt'}</strong>
+                              </p>
+                              {order.deliveryRoute.distance && (
+                                <p className={`text-xs ${isDarkMode ? 'text-white/60' : 'text-gray-600'}`}>
+                                  📏 Entfernung: {order.deliveryRoute.distance.text}
+                                </p>
+                              )}
+                              {order.deliveryRoute.maps_url && (
+                                <a
+                                  href={order.deliveryRoute.maps_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`inline-flex items-center gap-1 mt-1 text-xs px-2 py-1 rounded transition-colors ${
+                                    isDarkMode 
+                                      ? 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30' 
+                                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                  }`}
+                                >
+                                  🗺️ Route in Google Maps öffnen
+                                </a>
+                              )}
+                            </div>
                           )}
                         </div>
 
