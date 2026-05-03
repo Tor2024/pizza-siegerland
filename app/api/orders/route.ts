@@ -25,6 +25,7 @@ export async function POST(req: Request) {
     }
 
     const orderId = `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const confirmationToken = `conf_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
       const newOrder: any = {
         id: orderId,
@@ -41,7 +42,8 @@ export async function POST(req: Request) {
         ],
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        estimatedDelivery: orderData.estimatedDelivery || '25-35 min'
+        estimatedDelivery: orderData.estimatedDelivery || '25-35 min',
+        confirmationToken: confirmationToken
       };
 
     // Сохраняем заказ в GitHub (persistent) и cache
@@ -73,15 +75,6 @@ export async function POST(req: Request) {
         // Не прерываем создание заказа, если работа с юзером не удалась
       }
     }
-
-    // Generate confirmation token
-    const confirmationToken = `conf_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-    newOrder.confirmationToken = confirmationToken;
-    newOrder.status = 'received'; // Still 'received' until confirmed
-
-    // Save order with token
-    await saveOrder(newOrder);
-    orderCache.set(orderId, newOrder);
 
     // Send confirmation email
     if (orderData.customer?.email) {
