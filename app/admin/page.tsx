@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiRefreshCw, FiLogOut, FiCheckCircle, FiAlertCircle, FiPackage, FiTruck, FiClock } from 'react-icons/fi';
+import { FiRefreshCw, FiLogOut, FiCheckCircle, FiAlertCircle, FiPackage, FiTruck, FiClock, FiHelpCircle } from 'react-icons/fi';
 import { MenuData } from '@/types';
 
 // Status configuration - German only
@@ -12,6 +12,12 @@ const statusMap = {
     color: 'bg-blue-500', 
     icon: FiPackage,
     hint: '🔔 Neue Bestellung! Zutaten prüfen.' 
+  },
+  pending_confirmation: { 
+    label: 'Bestätigung ausstehend', 
+    color: 'bg-yellow-500', 
+    icon: FiClock,
+    hint: '⏳ Warte auf Bestätigungscode.' 
   },
   confirmed: { 
     label: 'Bestätigt', 
@@ -29,7 +35,7 @@ const statusMap = {
     label: 'Unterwegs', 
     color: 'bg-indigo-500', 
     icon: FiTruck,
-    hint: '🏍 Fahrer unterwegs. Lieferzeit ~15 Min.' 
+    hint: '🚚 Fahrer unterwegs. Lieferzeit ~15 Min.' 
   },
   done: { 
     label: 'Geliefert', 
@@ -731,7 +737,7 @@ export default function AdminDashboard() {
               {orders
                 .filter(o => orderFilter === 'all' || o.status === orderFilter)
                 .map((order) => {
-                const cfg = statusMap[order.status];
+                const cfg = statusMap[order.status] || { label: order.status || 'Unbekannt', color: 'bg-gray-500', icon: FiHelpCircle, hint: '' };
                 const StatusIcon = cfg.icon;
                 const elapsed = getElapsedMinutes(order.createdAt);
                 const isUrgent = order.status === 'received' && elapsed > 10;
