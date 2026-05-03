@@ -7,6 +7,11 @@ const PROTECTED_PATHS = [
   '/admin'
 ];
 
+// Paths that are excluded from auth check (login page)
+const EXCLUDED_PATHS = [
+  '/admin/login'
+];
+
 // Paths that need rate limiting
 const RATE_LIMITED_PATHS = [
   '/api/orders',
@@ -65,7 +70,7 @@ export function proxy(request: NextRequest) {
   }
 
   // Check admin auth for protected paths
-  if (isProtectedPath(pathname)) {
+  if (isProtectedPath(pathname) && !EXCLUDED_PATHS.some(p => pathname.startsWith(p))) {
     const authHeader = request.headers.get('authorization');
     const adminSecret = process.env.ADMIN_SECRET;
     
