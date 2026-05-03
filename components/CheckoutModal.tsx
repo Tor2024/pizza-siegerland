@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCartStore } from '@/store/useCartStore';
@@ -73,7 +73,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     setAddressError('');
   };
 
-  const handlePayment = async () => {
+      const handlePayment = async () => {
     if (hasPaid || isProcessing) return; // Prevent double submission
     setIsProcessing(true);
     setHasPaid(true);
@@ -84,7 +84,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       const newTrackId = `PR${Date.now().toString().slice(-6)}`;
       
       // Send order to server
-      const response = await fetch('/api/admin/orders', {
+      const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -132,6 +132,15 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       setHasPaid(false);
     }
   };
+
+  const [emailSent, setEmailSent] = useState(false);
+
+  // Check if email was sent (when order is successful and email was provided)
+  useEffect(() => {
+    if (isSuccess && address.email) {
+      setEmailSent(true);
+    }
+  }, [isSuccess, address.email]);
 
   const handleNewOrder = () => {
     setIsSuccess(false);
@@ -217,6 +226,12 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     <FiTruck className="text-roma-gold" />
                     <span>{t('track_id')}: #{trackId}</span>
                   </div>
+                  {emailSent && (
+                    <div className="flex items-center gap-3 text-white/80 mt-2">
+                      <span>📧</span>
+                      <span>Bestätigungs-E-Mail gesendet an {address.email}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-3">
                   <button 
