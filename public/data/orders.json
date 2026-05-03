@@ -1019,5 +1019,92 @@
     "updatedAt": 1777823510246,
     "estimatedDelivery": "25-35 min",
     "confirmationCode": "705347"
+  },
+  {
+    "id": "ord_1777823510246_d98popqam",
+    "items": [
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "60cm",
+        "price": 28.45,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      },
+      {
+        "id": "p3",
+        "name": {
+          "de": "Tonno",
+          "ru": "Тонно"
+        },
+        "size": "40",
+        "price": 17.5,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p3_pizza_tonno.webp"
+      },
+      {
+        "id": "p3",
+        "name": {
+          "de": "Tonno",
+          "ru": "Тонно"
+        },
+        "size": "40",
+        "price": 20,
+        "quantity": 1,
+        "toppings": [
+          {
+            "id": "t1",
+            "name": {
+              "de": "Extra Käse",
+              "ru": "Доп. сыр"
+            },
+            "price": 1.5
+          },
+          {
+            "id": "t2",
+            "name": {
+              "de": "Oliven",
+              "ru": "Оливки"
+            },
+            "price": 1
+          }
+        ],
+        "image": "/images/p3_pizza_tonno.webp"
+      }
+    ],
+    "customer": {
+      "name": "powitze 19",
+      "phone": "01523724",
+      "email": "stingodo@gmail.com",
+      "address": "powitze 19, 57072 Siegen"
+    },
+    "total": 65.95,
+    "subtotal": 65.95,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "confirmed",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777823510246,
+        "note": "Order pending confirmation"
+      },
+      {
+        "status": "confirmed",
+        "timestamp": 1777823519502,
+        "note": "Order confirmed by customer via code"
+      }
+    ],
+    "createdAt": 1777823510246,
+    "updatedAt": 1777823519502,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "705347",
+    "confirmedAt": 1777823519502
   }
 ]
