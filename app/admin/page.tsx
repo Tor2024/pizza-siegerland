@@ -73,13 +73,16 @@ interface Order {
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [tab, setTab] = useState<'orders' | 'menu' | 'offers' | 'legal'>('orders');
+  const [tab, setTab] = useState<'orders' | 'menu' | 'offers' | 'legal' | 'users'>('orders');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [menuData, setMenuData] = useState<MenuData | null>(null);
   const [menuLoading, setMenuLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
   const [orderFilter, setOrderFilter] = useState<OrderStatus | 'all'>('all');  
+  // Users state
+  const [users, setUsers] = useState<any[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
   // Theme state
   const [isDarkMode, setIsDarkMode] = useState(true);  
   // Toggle theme
@@ -140,6 +143,31 @@ export default function AdminDashboard() {
     setMenuLoading(false);
   }, []);
 
+  // Fetch users
+  const fetchUsers = useCallback(async () => {
+    const token = getAdminToken();
+    if (!token) {
+      setError('Not authenticated');
+      return;
+    }
+    setUsersLoading(true);
+    try {
+      const res = await fetch('/api/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      } else {
+        const err = await res.json();
+        setError(err.error || 'Failed to fetch users');
+      }
+    } catch (err) {
+      setError('Network error');
+    }
+    setUsersLoading(false);
+  }, []);
+
   // Poll every 10 seconds
   useEffect(() => {
     fetchOrders();
@@ -147,12 +175,15 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
-  // Load menu when switching tabs
+  // Load data when switching tabs
   useEffect(() => {
     if (tab === 'menu' || tab === 'offers' || tab === 'legal') {
       fetchMenu();
     }
-  }, [tab, fetchMenu]);
+    if (tab === 'users') {
+      fetchUsers();
+    }
+  }, [tab, fetchMenu, fetchUsers]);
 
   // Change order status
   const changeStatus = async (orderId: string, newStatus: OrderStatus) => {
@@ -624,6 +655,16 @@ export default function AdminDashboard() {
             }`}
           >
             Rechtliches
+          </button>
+          <button 
+            onClick={() => setTab('users')} 
+            className={`px-6 py-3 rounded-t-lg font-semibold transition-colors ${
+              tab === 'users' 
+                ? 'bg-roma-red text-white' 
+                : isDarkMode ? 'text-white/50 hover:text-white' : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Kunden ({users.length})
           </button>
         </div>
       </div>
@@ -1509,6 +1550,52 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <p className={isDarkMode ? 'text-white/40' : 'text-gray-400'}>Daten konnten nicht geladen werden</p>
+                )}
+              </div>
+            </motion.div>
+          ) : tab === 'users' ? (
+            <motion.div
+              key="users"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-6"
+            >
+              <div className={`rounded-2xl p-6 border ${isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-sm'}`}>
+                <h2 className="text-2xl font-bold mb-4">Kunden verwalten</h2>
+                <p className="text-white/60 mb-6">
+                  Liste aller registrierten Kunden und deren Bestellungen.
+                </p>
+
+                {usersLoading ? (
+                  <div className="text-center py-10">
+                    <FiRefreshCw className="animate-spin mx-auto mb-2" size={24} />
+                    <p className={isDarkMode ? 'text-white/60' : 'text-gray-500'}>Wird geladen...</p>
+                  </div>
+                ) : users.length === 0 ? (
+                  <div className={`text-center py-10 ${isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>
+                    <p className="text-lg">Keine Kunden</p>
+                    <p className="text-sm mt-2">Kunden erscheinen hier automatisch nach Bestellungen.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {users.map((user: any) => (
+                      <div key={user.id} className={`rounded-xl p-4 border ${isDarkMode ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white'}`}>
+                        <div className="flex flex-col md:flex-row justify-between gap-4">
+                          <div>
+                            <h3 className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{user.name || 'Unbekannt'}</h3>
+                            <p className={`text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>✉️ {user.email}</p>
+                            <p className={`text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>📞 {user.phone}</p>
+                            {user.address && <p className={`text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>📍 {user.address}</p>}
+                            <p className={`text-xs ${isDarkMode ? 'text-white/40' : 'text-gray-400'}`}>Registriert: {new Date(user.createdAt).toLocaleDateString('de-DE')}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Bestellungen: {user.orders?.length || 0}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </motion.div>
