@@ -270,5 +270,60 @@
     "status": "received",
     "createdAt": 1777748609457,
     "updatedAt": 1777748609457
+  },
+  {
+    "id": "ord_1777798445283_nwjhcfpol",
+    "items": [
+      {
+        "id": "pas2",
+        "name": {
+          "de": "Pasta Bolognese",
+          "ru": "Паста Болоньезе"
+        },
+        "size": "300gr",
+        "price": 10.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/pas2_pasta_bolo.webp"
+      },
+      {
+        "id": "pas1",
+        "name": {
+          "de": "Pasta Carbonara",
+          "ru": "Паста Карбонара"
+        },
+        "size": "300gr",
+        "price": 11.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/pas1_pasta_carb.webp"
+      },
+      {
+        "id": "p6",
+        "name": {
+          "de": "Prosciutto Funghi",
+          "ru": "Прошутто Фунги"
+        },
+        "size": "32",
+        "price": 13.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p6_pizza_prosciutto.webp"
+      }
+    ],
+    "customer": {
+      "name": "Kattowitzer ждлл",
+      "phone": "015237237407",
+      "email": "kalchenko2022@gmail.com",
+      "address": "Kattowitzer ждлл, 57072 Siegen"
+    },
+    "subtotal": 36.7,
+    "deliveryFee": 0,
+    "total": 36.7,
+    "paymentMethod": "cash",
+    "deliveryTime": "asap",
+    "status": "received",
+    "createdAt": 1777798445284,
+    "updatedAt": 1777798445284
   }
 ]
