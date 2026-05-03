@@ -74,7 +74,6 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [isConfirming, setIsConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState('');
   const [confirmationCode, setConfirmationCode] = useState<string | undefined>(undefined);
-  const [emailConfigured, setEmailConfigured] = useState(true); // assume configured by default
 
   const handleAddressChange = (field: string, value: string) => {
     setAddress(prev => ({...prev, [field]: value}));
@@ -128,7 +127,6 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
         setTrackId(newTrackId);
         setCreatedOrderId(result.orderId);
         setConfirmationCode(result.confirmationCode);
-        setEmailConfigured(!result.confirmationCode); // If code is returned, email is NOT configured
         setStep(3); // Move to confirmation step
         setIsProcessing(false);
         setHasPaid(false);
@@ -215,7 +213,6 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     setEnteredCode('');
     setConfirmError('');
     setConfirmationCode(undefined);
-    setEmailConfigured(true);
     onClose();
   };
 
@@ -540,25 +537,27 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   <div className="space-y-6 text-center">
                     <div>
                       <h3 className="text-xl font-bold text-white mb-2">Bestellung bestätigen</h3>
-                      {emailConfigured ? (
+                      {address.email ? (
                         <p className="text-white/60 text-sm">
                           Wir haben einen 6-stelligen Bestätigungscode an <strong>{address.email}</strong> gesendet. 
                           Bitte geben Sie den Code unten ein, um Ihre Bestellung zu bestätigen.
                         </p>
                       ) : (
                         <p className="text-white/60 text-sm">
-                          E-Mail-Service ist nicht konfiguriert. Hier ist Ihr Bestätigungscode:
+                          Ihr Bestätigungscode:
                         </p>
                       )}
                     </div>
                     
-                    {!emailConfigured && confirmationCode && (
+                    {confirmationCode && (
                       <div className="bg-roma-gold/20 border border-roma-gold/50 rounded-xl p-6 max-w-xs mx-auto">
                         <p className="text-white/60 text-sm mb-2">Ihr Bestätigungscode:</p>
                         <div className="text-4xl font-bold text-roma-gold tracking-[0.3em]">
                           {confirmationCode}
                         </div>
-                        <p className="text-white/40 text-xs mt-2">Dieser Code wurde auch in der Konsole protokolliert</p>
+                        {address.email && (
+                          <p className="text-white/40 text-xs mt-2">Code wurde auch an {address.email} gesendet</p>
+                        )}
                       </div>
                     )}
                     

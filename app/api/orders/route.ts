@@ -82,7 +82,7 @@ export async function POST(req: Request) {
       try {
         const apiKey = process.env.RESEND_API_KEY;
         
-        await fetch('https://api.resend.com/emails', {
+        const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${apiKey}`,
@@ -123,7 +123,13 @@ export async function POST(req: Request) {
           `,
           }),
         });
-        console.log(`📧 Confirmation email with code sent to ${orderData.customer.email}`);
+        
+        if (response.ok) {
+          console.log(`📧 Confirmation email with code sent to ${orderData.customer.email}`);
+        } else {
+          const errorData = await response.json();
+          console.error('Resend API error:', errorData);
+        }
       } catch (emailError) {
         console.error('Email send error:', emailError);
       }
@@ -134,10 +140,11 @@ export async function POST(req: Request) {
     // Отправляем уведомление админу (заглушка для future webhook)
     console.log(`🍕 New order received: ${orderId} - ${orderData.customer.name} - ${orderData.total}€`);
 
+    // Always return confirmation code in response for UI display
     return NextResponse.json({ 
       success: true, 
       orderId,
-      confirmationCode: !emailConfigured ? confirmationCode : undefined, // Return code only if email not configured
+      confirmationCode: confirmationCode, // Always return code for UI
       order: newOrder,
       message: 'Order created successfully'
     });
