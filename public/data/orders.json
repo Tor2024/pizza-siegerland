@@ -435,5 +435,57 @@
     "status": "received",
     "createdAt": 1777813648742,
     "updatedAt": 1777813648742
+  },
+  {
+    "id": "ord_1777820265458_cfyildmlx",
+    "items": [
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "60cm",
+        "price": 28.45,
+        "quantity": 2,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      },
+      {
+        "id": "p3",
+        "name": {
+          "de": "Tonno",
+          "ru": "Тонно"
+        },
+        "size": "40",
+        "price": 17.5,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p3_pizza_tonno.webp"
+      }
+    ],
+    "customer": {
+      "name": "powitze 19",
+      "phone": "01523724",
+      "email": "stingodo@gmail.com",
+      "address": "powitze 19, 57072 Siegen"
+    },
+    "total": 74.4,
+    "subtotal": 74.4,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "pending_confirmation",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777820265458,
+        "note": "Order pending confirmation"
+      }
+    ],
+    "createdAt": 1777820265458,
+    "updatedAt": 1777820265458,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "938148"
   }
 ]
