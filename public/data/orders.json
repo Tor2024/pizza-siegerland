@@ -1274,5 +1274,72 @@
     "estimatedDelivery": "25-35 min",
     "confirmationCode": "702251",
     "confirmedAt": 1777823816698
+  },
+  {
+    "id": "ord_1777827693236_nkdh6y1m8",
+    "items": [
+      {
+        "id": "p3",
+        "name": {
+          "de": "Tonno",
+          "ru": "Тонно"
+        },
+        "size": "40",
+        "price": 17.5,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p3_pizza_tonno.webp"
+      },
+      {
+        "id": "p2",
+        "name": {
+          "de": "Salami",
+          "ru": "Салями"
+        },
+        "size": "40cm",
+        "price": 16.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p2_pizza_salami.webp"
+      },
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "26cm",
+        "price": 8.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      }
+    ],
+    "customer": {
+      "name": "powitze 19",
+      "phone": "01523724",
+      "email": "stingodo@gmail.com",
+      "address": "powitze 19, 57072 Siegen"
+    },
+    "total": 43.3,
+    "subtotal": 43.3,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "pending_confirmation",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777827693366,
+        "note": "Order pending confirmation"
+      }
+    ],
+    "createdAt": 1777827693366,
+    "updatedAt": 1777827693366,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "773907",
+    "addressValid": true,
+    "customerCoords": null,
+    "deliveryRoute": null
   }
 ]
