@@ -1408,5 +1408,78 @@
     "addressValid": true,
     "customerCoords": null,
     "deliveryRoute": null
+  },
+  {
+    "id": "ord_1777827945685_gv9lrivx1",
+    "items": [
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "60cm",
+        "price": 28.45,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      },
+      {
+        "id": "pas1",
+        "name": {
+          "de": "Pasta Carbonara",
+          "ru": "Паста Карбонара"
+        },
+        "size": "300gr",
+        "price": 11.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/pas1_pasta_carb.webp"
+      },
+      {
+        "id": "d3",
+        "name": {
+          "de": "Sprite 0,5L",
+          "ru": "Спрайт 0,5л"
+        },
+        "size": "1 Stück",
+        "price": 2.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/d3_sprite.webp"
+      }
+    ],
+    "customer": {
+      "name": "Siegener Str.  39",
+      "phone": "01523724",
+      "email": "stingodo@gmail.com",
+      "address": "Siegener Str.  39, 57223 Kreuztal"
+    },
+    "total": 43.25,
+    "subtotal": 43.25,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "confirmed",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777827945797,
+        "note": "Order pending confirmation"
+      },
+      {
+        "status": "confirmed",
+        "timestamp": 1777827960068,
+        "note": "Order confirmed by customer via code"
+      }
+    ],
+    "createdAt": 1777827945798,
+    "updatedAt": 1777827960068,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "916161",
+    "addressValid": true,
+    "customerCoords": null,
+    "deliveryRoute": null,
+    "confirmedAt": 1777827960068
   }
 ]
