@@ -137,11 +137,15 @@ export interface Order {
   total: number;
   subtotal: number;
   deliveryFee: number;
-  status: 'received' | 'preparing' | 'delivering' | 'done' | 'cancelled';
+  status: 'received' | 'confirmed' | 'preparing' | 'delivering' | 'done' | 'cancelled';
   createdAt: number;
   updatedAt?: number;
   paymentMethod?: string;
   deliveryTime?: string;
   promoCode?: string;
   promoDiscount?: number;
+  confirmationToken?: string;
+  confirmedAt?: number;
+  estimatedDelivery?: string;
+  statusHistory?: Array<{ status: string; timestamp: number; note?: string }>;
 }

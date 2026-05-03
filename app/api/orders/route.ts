@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { saveOrder, getOrder } from '@/lib/githubStorage';
 import { findUserByEmail, addUser, addOrderToUser } from '@/lib/userStorage';
+import { Resend } from 'resend';
 
 // In-memory cache for fast access
 const orderCache = new Map<string, any>();
@@ -70,6 +71,65 @@ export async function POST(req: Request) {
       } catch (userError) {
         console.error('User processing error:', userError);
         // Не прерываем создание заказа, если работа с юзером не удалась
+      }
+    }
+
+    // Generate confirmation token
+    const confirmationToken = `conf_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    newOrder.confirmationToken = confirmationToken;
+    newOrder.status = 'received'; // Still 'received' until confirmed
+
+    // Save order with token
+    await saveOrder(newOrder);
+    orderCache.set(orderId, newOrder);
+
+    // Send confirmation email
+    if (orderData.customer?.email) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        const confirmUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-siegerland.vercel.app'}/order/confirm?token=${confirmationToken}`;
+        
+        await resend.emails.send({
+          from: process.env.EMAIL_FROM || 'Pizza Roma <noreply@pizza-roma.de>',
+          to: [orderData.customer.email],
+          subject: `🍕 Bestätigen Sie Ihre Bestellung #${orderId.slice(-8)}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #c41e3a;">Pizza Roma - Bestellung bestätigen</h1>
+              <p>Hallo ${orderData.customer.name},</p>
+              <p>vielen Dank für Ihre Bestellung! Bitte bestätigen Sie Ihre Bestellung durch Klick auf den Button:</p>
+              
+              <div style="margin: 30px 0;">
+                <a href="${confirmUrl}" style="background: #c41e3a; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                  ✅ Bestellung bestätigen
+                </a>
+              </div>
+              
+              <p style="color: #666; font-size: 14px;">
+                Oder kopieren Sie diesen Link in Ihren Browser:<br>
+                <code style="background: #f5f5f5; padding: 10px; display: block; margin-top: 10px; border-radius: 4px;">${confirmUrl}</code>
+              </p>
+              
+              <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+              
+              <h3>Ihre Bestellung:</h3>
+              <ul>
+                ${orderData.items.map((item: any) => `<li>${item.quantity}x ${item.name.de} (${item.size}) - ${(item.price * item.quantity).toFixed(2)}€</li>`).join('')}
+              </ul>
+              <p><strong>Gesamt: ${orderData.total.toFixed(2)}€</strong></p>
+              
+              <p style="color: #999; font-size: 12px; margin-top: 30px;">
+                Pizza Roma Siegen<br>
+                📍 Ihre Lieferadresse: ${orderData.customer.address}<br>
+                📞 ${orderData.customer.phone}
+              </p>
+            </div>
+          `,
+        });
+        console.log(`📧 Confirmation email sent to ${orderData.customer.email}`);
+      } catch (emailError) {
+        console.error('Email send error:', emailError);
+        // Don't fail the order if email fails
       }
     }
 
