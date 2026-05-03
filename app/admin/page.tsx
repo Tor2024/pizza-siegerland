@@ -75,6 +75,8 @@ interface Order {
   deliveryTime?: string;
   promoCode?: string;
   promoDiscount?: number;
+  confirmedAt?: number;
+  confirmationToken?: string;
 }
 
 export default function AdminDashboard() {
@@ -760,6 +762,14 @@ export default function AdminDashboard() {
                         <div className="space-y-1 mb-4">
                           <p className={isDarkMode ? 'text-white/80' : 'text-gray-700'}>📞 {order.customer.phone}</p>
                           {order.customer.email && <p className={`text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>✉️ {order.customer.email}</p>}
+                          {order.confirmationToken && (
+                            <p className={`text-sm ${isDarkMode ? 'text-blue-400/80' : 'text-blue-600'}`}>📧 E-Mail Bestätigung gesendet</p>
+                          )}
+                          {order.confirmedAt && (
+                            <p className={`text-sm ${isDarkMode ? 'text-green-400/80' : 'text-green-600'}`}>
+                              ✅ Bestätigt am {new Date(order.confirmedAt).toLocaleString('de-DE')}
+                            </p>
+                          )}
                           {order.customer.note && <p className={`text-sm ${isDarkMode ? 'text-yellow-400/80' : 'text-yellow-600'}`}>📝 {order.customer.note}</p>}
                           {order.paymentMethod && (
                             <p className={`text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>
