@@ -582,5 +582,199 @@
     "updatedAt": 1777820553442,
     "estimatedDelivery": "25-35 min",
     "confirmationCode": "291013"
+  },
+  {
+    "id": "ord_1777821530063_mq40xt1yz",
+    "items": [
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "60cm",
+        "price": 28.45,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      },
+      {
+        "id": "p2",
+        "name": {
+          "de": "Salami",
+          "ru": "Салями"
+        },
+        "size": "40cm",
+        "price": 16.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p2_pizza_salami.webp"
+      }
+    ],
+    "customer": {
+      "name": "powitze 19",
+      "phone": "01523724",
+      "address": "powitze 19, 57072 Siegen"
+    },
+    "total": 45.349999999999994,
+    "subtotal": 45.349999999999994,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "pending_confirmation",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777821530063,
+        "note": "Order pending confirmation"
+      }
+    ],
+    "createdAt": 1777821530063,
+    "updatedAt": 1777821530063,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "719249"
+  },
+  {
+    "id": "ord_1777821530063_mq40xt1yz",
+    "items": [
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "60cm",
+        "price": 28.45,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      },
+      {
+        "id": "p2",
+        "name": {
+          "de": "Salami",
+          "ru": "Салями"
+        },
+        "size": "40cm",
+        "price": 16.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p2_pizza_salami.webp"
+      }
+    ],
+    "customer": {
+      "name": "powitze 19",
+      "phone": "01523724",
+      "address": "powitze 19, 57072 Siegen"
+    },
+    "total": 45.349999999999994,
+    "subtotal": 45.349999999999994,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "confirmed",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777821530063,
+        "note": "Order pending confirmation"
+      },
+      {
+        "status": "confirmed",
+        "timestamp": 1777821541666,
+        "note": "Order confirmed by customer via code"
+      }
+    ],
+    "createdAt": 1777821530063,
+    "updatedAt": 1777821541666,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "719249",
+    "confirmedAt": 1777821541666
+  },
+  {
+    "id": "ord_1777821573357_lb7z68nzb",
+    "items": [
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "47cm",
+        "price": 15.9,
+        "quantity": 3,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      }
+    ],
+    "customer": {
+      "name": "powitze 19",
+      "phone": "01523724",
+      "email": "stingodo@gmail.com",
+      "address": "powitze 19, 57072 Siegen"
+    },
+    "total": 47.7,
+    "subtotal": 47.7,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "pending_confirmation",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777821573357,
+        "note": "Order pending confirmation"
+      }
+    ],
+    "createdAt": 1777821573357,
+    "updatedAt": 1777821573357,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "878822"
+  },
+  {
+    "id": "ord_1777821573357_lb7z68nzb",
+    "items": [
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "47cm",
+        "price": 15.9,
+        "quantity": 3,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      }
+    ],
+    "customer": {
+      "name": "powitze 19",
+      "phone": "01523724",
+      "email": "stingodo@gmail.com",
+      "address": "powitze 19, 57072 Siegen"
+    },
+    "total": 47.7,
+    "subtotal": 47.7,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "confirmed",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777821573357,
+        "note": "Order pending confirmation"
+      },
+      {
+        "status": "confirmed",
+        "timestamp": 1777821587942,
+        "note": "Order confirmed by customer via code"
+      }
+    ],
+    "createdAt": 1777821573357,
+    "updatedAt": 1777821587942,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "878822",
+    "confirmedAt": 1777821587942
   }
 ]
