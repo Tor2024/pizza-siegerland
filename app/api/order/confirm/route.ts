@@ -1,80 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrder, saveOrder, getOrders } from '@/lib/githubStorage';
 
-export async function GET(req: NextRequest) {
+// POST - confirm order with 6-digit code
+export async function POST(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const token = searchParams.get('token');
+    const { orderId, confirmationCode } = await req.json();
 
-    if (!token) {
-      return new NextResponse(
-        generateHtmlResponse('Fehler', 'Token fehlt!', 'danger'),
-        { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-      );
+    if (!orderId || !confirmationCode) {
+      return NextResponse.json({ error: 'Order ID and confirmation code are required' }, { status: 400 });
     }
 
-    // Search in all orders for matching confirmation token
-    const orders = await getOrders();
-    const foundOrder = orders.find((o: any) => o.confirmationToken === token);
-
-    if (!foundOrder) {
-      return new NextResponse(
-        generateHtmlResponse('Fehler', 'Ungültiger oder abgelaufener Token!', 'danger'),
-        { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-      );
+    const order = await getOrder(orderId);
+    if (!order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    if (foundOrder.status === 'confirmed') {
-      return new NextResponse(
-        generateHtmlResponse('Bereits bestätigt', 'Diese Bestellung wurde bereits bestätigt!', 'success'),
-        { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-      );
+    if (order.status !== 'pending_confirmation') {
+      return NextResponse.json({ error: 'Order is not pending confirmation' }, { status: 400 });
+    }
+
+    if (order.confirmationCode !== confirmationCode) {
+      return NextResponse.json({ error: 'Invalid confirmation code' }, { status: 400 });
     }
 
     // Update order status to confirmed
-    foundOrder.status = 'confirmed';
-    foundOrder.confirmedAt = Date.now();
-    foundOrder.updatedAt = Date.now();
+    order.status = 'confirmed';
+    order.confirmedAt = Date.now();
+    order.updatedAt = Date.now();
     
-    // Optional: add to status history if it exists
-    if (!foundOrder.statusHistory) foundOrder.statusHistory = [];
-    foundOrder.statusHistory.push({
+    if (!order.statusHistory) order.statusHistory = [];
+    order.statusHistory.push({
       status: 'confirmed',
       timestamp: Date.now(),
-      note: 'Order confirmed by customer via email'
+      note: 'Order confirmed by customer via code'
     });
 
-    await saveOrder(foundOrder);
+    await saveOrder(order);
 
-    return new NextResponse(
-      generateHtmlResponse(
-        '✅ Bestellung bestätigt!',
-        `
-        <div class="text-left">
-          <p class="mb-4">Vielen Dank! Ihre Bestellung <strong>#${foundOrder.id.slice(-8)}</strong> wurde erfolgreich bestätigt.</p>
-          
-          <div class="bg-white/10 rounded-lg p-4 mb-4">
-            <h3 class="font-bold mb-2">Bestelldetails:</h3>
-            <p>📍 ${foundOrder.customer.address}</p>
-            <p>📞 ${foundOrder.customer.phone}</p>
-            <p class="mt-2"><strong>Gesamt: ${foundOrder.total.toFixed(2)}€</strong></p>
-          </div>
-
-          <p class="text-sm opacity-80">Wir bereiten Ihre Bestellung jetzt zu. Die voraussichtliche Lieferzeit beträgt ${foundOrder.estimatedDelivery || '25-35 Min'}.</p>
-        </div>
-        `,
-        'success'
-      ),
-      { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-    );
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Order confirmed successfully',
+      order: { id: order.id, status: order.status }
+    });
 
   } catch (error) {
     console.error('Confirmation error:', error);
-    return new NextResponse(
-      generateHtmlResponse('Fehler', 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.', 'danger'),
-      { status: 500, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-    );
+    return NextResponse.json({ 
+      error: 'Failed to confirm order',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
+}
+
+// GET - keep for backward compatibility (maybe not needed)
+export async function GET(req: NextRequest) {
+  return new NextResponse(
+    generateHtmlResponse('Info', 'Bitte verwenden Sie das Formular in der App zur Bestätigung Ihrer Bestellung.', 'success'),
+    { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+  );
 }
 
 function generateHtmlResponse(title: string, message: string, type: 'success' | 'danger'): string {

@@ -137,7 +137,7 @@ export interface Order {
   total: number;
   subtotal: number;
   deliveryFee: number;
-  status: 'received' | 'confirmed' | 'preparing' | 'delivering' | 'done' | 'cancelled';
+  status: 'pending' | 'pending_confirmation' | 'received' | 'confirmed' | 'preparing' | 'delivering' | 'done' | 'cancelled';
   createdAt: number;
   updatedAt?: number;
   paymentMethod?: string;
@@ -146,6 +146,7 @@ export interface Order {
   promoDiscount?: number;
   confirmationToken?: string;
   confirmedAt?: number;
+  confirmationCode?: string; // 6-digit code for client confirmation
   estimatedDelivery?: string;
   statusHistory?: Array<{ status: string; timestamp: number; note?: string }>;
 }

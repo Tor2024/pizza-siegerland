@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     }
 
     const orderId = `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const confirmationToken = `conf_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    const confirmationCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
     
       const newOrder: any = {
         id: orderId,
@@ -35,14 +35,14 @@ export async function POST(req: Request) {
         deliveryFee: orderData.deliveryFee,
         promoCode: orderData.promoCode || null,
         promoDiscount: orderData.promoDiscount || 0,
-        status: 'received' as const,
+        status: 'pending_confirmation' as const,
         statusHistory: [
-          { status: 'received' as const, timestamp: Date.now(), note: 'Order received' }
+          { status: 'pending_confirmation' as const, timestamp: Date.now(), note: 'Order pending confirmation' }
         ],
         createdAt: Date.now(),
         updatedAt: Date.now(),
         estimatedDelivery: orderData.estimatedDelivery || '25-35 min',
-        confirmationToken: confirmationToken
+        confirmationCode: confirmationCode
       };
 
     // Сохраняем заказ в GitHub (persistent) и cache
@@ -75,11 +75,10 @@ export async function POST(req: Request) {
       }
     }
 
-    // Send confirmation email
+    // Send confirmation email with 6-digit code
     if (orderData.customer?.email) {
       try {
         const apiKey = process.env.RESEND_API_KEY;
-        const confirmUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-siegerland.vercel.app'}/order/confirm?token=${confirmationToken}`;
         
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -90,23 +89,20 @@ export async function POST(req: Request) {
           body: JSON.stringify({
             from: process.env.EMAIL_FROM || 'Pizza Roma <noreply@pizza-roma.de>',
             to: [orderData.customer.email],
-            subject: `🍕 Bestätigen Sie Ihre Bestellung #${orderId.slice(-8)}`,
+            subject: `🍕 Ihr Bestätigungscode für Bestellung #${orderId.slice(-8)}`,
             html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h1 style="color: #c41e3a;">Pizza Roma - Bestellung bestätigen</h1>
+              <h1 style="color: #c41e3a;">Pizza Roma - Bestätigungscode</h1>
               <p>Hallo ${orderData.customer.name},</p>
-              <p>vielen Dank für Ihre Bestellung! Bitte bestätigen Sie Ihre Bestellung durch Klick auf den Button:</p>
+              <p>vielen Dank für Ihre Bestellung! Bitte geben Sie den folgenden 6-stelligen Code in der Bestellübersicht ein, um Ihre Bestellung zu bestätigen:</p>
               
-              <div style="margin: 30px 0;">
-                <a href="${confirmUrl}" style="background: #c41e3a; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-                  ✅ Bestellung bestätigen
-                </a>
+              <div style="margin: 30px 0; text-align: center;">
+                <div style="background: #f5f5f5; color: #c41e3a; padding: 20px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 5px; border: 2px dashed #c41e3a;">
+                  ${confirmationCode}
+                </div>
               </div>
               
-              <p style="color: #666; font-size: 14px;">
-                Oder kopieren Sie diesen Link in Ihren Browser:<br>
-                <code style="background: #f5f5f5; padding: 10px; display: block; margin-top: 10px; border-radius: 4px;">${confirmUrl}</code>
-              </p>
+              <p style="color: #666; font-size: 14px;">Dieser Code ist für Ihre Bestellung <strong>#${orderId.slice(-8)}</strong> bestimmt.</p>
               
               <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
               
@@ -125,10 +121,9 @@ export async function POST(req: Request) {
           `,
           }),
         });
-        console.log(`📧 Confirmation email sent to ${orderData.customer.email}`);
+        console.log(`📧 Confirmation email with code sent to ${orderData.customer.email}`);
       } catch (emailError) {
         console.error('Email send error:', emailError);
-        // Don't fail the order if email fails
       }
     }
 

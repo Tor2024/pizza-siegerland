@@ -68,12 +68,18 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [agbAccepted, setAgbAccepted] = useState(false);
   const [trackId, setTrackId] = useState('');
 
+  // New states for confirmation step
+  const [createdOrderId, setCreatedOrderId] = useState('');
+  const [enteredCode, setEnteredCode] = useState('');
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState('');
+
   const handleAddressChange = (field: string, value: string) => {
     setAddress(prev => ({...prev, [field]: value}));
     setAddressError('');
   };
 
-      const handlePayment = async () => {
+  const handlePayment = async () => {
     if (hasPaid || isProcessing) return; // Prevent double submission
     setIsProcessing(true);
     setHasPaid(true);
@@ -118,9 +124,10 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
       
       if (response.ok && result.success) {
         setTrackId(newTrackId);
-        clearCart();
+        setCreatedOrderId(result.orderId);
+        setStep(3); // Move to confirmation step
         setIsProcessing(false);
-        setIsSuccess(true);
+        setHasPaid(false);
       } else {
         setOrderError(result.error || 'Bestellung fehlgeschlagen. Bitte versuchen Sie es erneut.');
         setIsProcessing(false);
@@ -133,30 +140,38 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     }
   };
 
-  const [emailSent, setEmailSent] = useState(false);
-
-  // Check if email was sent (when order is successful and email was provided)
-  useEffect(() => {
-    if (isSuccess && address.email) {
-      setEmailSent(true);
+  const handleConfirmation = async () => {
+    if (!enteredCode || enteredCode.length !== 6) {
+      setConfirmError('Bitte geben Sie den 6-stelligen Code ein.');
+      return;
     }
-  }, [isSuccess, address.email]);
-
-  const handleNewOrder = () => {
-    setIsSuccess(false);
-    setStep(1);
-    setPromoCode('');
-    setPromoDiscount(0);
-    setAddress({
-      street: '',
-      number: '',
-      zip: '57072',
-      city: 'Siegen',
-      phone: '',
-      email: '',
-      note: ''
-    });
-    onClose();
+    setIsConfirming(true);
+    setConfirmError('');
+    try {
+      const response = await fetch('/api/order/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: createdOrderId,
+          confirmationCode: enteredCode
+        })
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        // Confirmation successful
+        clearCart();
+        setIsSuccess(true);
+        setStep(1); // reset step for next order
+        setCreatedOrderId('');
+        setEnteredCode('');
+      } else {
+        setConfirmError(result.error || 'Ungültiger Code. Bitte versuchen Sie es erneut.');
+      }
+    } catch (error) {
+      setConfirmError('Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.');
+    } finally {
+      setIsConfirming(false);
+    }
   };
 
   // Validation state
@@ -178,6 +193,26 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     { id: 'scheduled', label: t('scheduled'), time: '' },
   ];
 
+  const handleNewOrder = () => {
+    setIsSuccess(false);
+    setStep(1);
+    setPromoCode('');
+    setPromoDiscount(0);
+    setAddress({
+      street: '',
+      number: '',
+      zip: '57072',
+      city: 'Siegen',
+      phone: '',
+      email: '',
+      note: ''
+    });
+    setCreatedOrderId('');
+    setEnteredCode('');
+    setConfirmError('');
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -196,7 +231,8 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               <h2 id="checkout-title" className="text-2xl font-poppins font-bold text-white">
                 {isSuccess ? t('order_success') : 
                  step === 1 ? t('delivery_details') : 
-                 t('payment')}
+                 step === 2 ? t('payment') :
+                 'Bestellung bestätigen'}
               </h2>
               <button 
                 onClick={onClose} 
@@ -226,7 +262,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     <FiTruck className="text-roma-gold" />
                     <span>{t('track_id')}: #{trackId}</span>
                   </div>
-                  {emailSent && (
+                  {address.email && (
                     <div className="flex items-center gap-3 text-white/80 mt-2">
                       <span>📧</span>
                       <span>Bestätigungs-E-Mail gesendet an {address.email}</span>
@@ -254,6 +290,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 <div className="flex gap-2 mb-6">
                   <div className={`flex-1 h-2 rounded-full ${step >= 1 ? 'bg-roma-red' : 'bg-white/10'}`} />
                   <div className={`flex-1 h-2 rounded-full ${step >= 2 ? 'bg-roma-red' : 'bg-white/10'}`} />
+                  {step === 3 && <div className={`flex-1 h-2 rounded-full bg-roma-red`} />}
                 </div>
 
                 {step === 1 ? (
@@ -312,7 +349,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     <div>
                       <input 
                         type="email" 
-                        placeholder="E-Mail (optional)"
+                        placeholder="E-Mail (für Bestätigungscode)"
                         value={address.email}
                         maxLength={100}
                         onChange={(e) => handleAddressChange('email', e.target.value)}
@@ -370,7 +407,7 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       {t('continue_payment')}
                     </button>
                   </div>
-                ) : (
+                ) : step === 2 ? (
                   <div className="space-y-4">
                     {/* Order Summary */}
                     <div className="bg-white/5 rounded-2xl p-4">
@@ -493,7 +530,58 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       </button>
                     </div>
                   </div>
-                )}
+                ) : step === 3 ? (
+                  <div className="space-y-6 text-center">
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">Bestellung bestätigen</h3>
+                      <p className="text-white/60 text-sm">
+                        Wir haben einen 6-stelligen Bestätigungscode an <strong>{address.email}</strong> gesendet. 
+                        Bitte geben Sie den Code unten ein, um Ihre Bestellung zu bestätigen.
+                      </p>
+                    </div>
+                    <div className="max-w-xs mx-auto">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={6}
+                        placeholder="000000"
+                        value={enteredCode}
+                        onChange={(e) => setEnteredCode(e.target.value.replace(/\D/g, ''))}
+                        className="w-full bg-white/10 text-white text-center text-3xl font-bold p-4 rounded-xl border border-white/10 focus:border-roma-gold outline-none tracking-[0.5em]"
+                      />
+                      {confirmError && <p className="text-red-400 text-sm mt-2">{confirmError}</p>}
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setStep(2);
+                          setCreatedOrderId('');
+                          setEnteredCode('');
+                        }}
+                        className="flex-1 bg-white/10 text-white py-3 rounded-xl font-semibold hover:bg-white/20 transition-colors"
+                      >
+                        ← Zurück
+                      </button>
+                      <button
+                        onClick={handleConfirmation}
+                        disabled={isConfirming || enteredCode.length !== 6}
+                        className="flex-[2] bg-roma-red text-white py-3 rounded-xl font-bold hover:bg-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {isConfirming ? (
+                          <>
+                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
+                            Wird bestätigt...
+                          </>
+                        ) : (
+                          <>
+                            <FiCheck /> Code bestätigen
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             )}
           </motion.div>
