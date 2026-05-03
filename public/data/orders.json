@@ -1106,5 +1106,86 @@
     "estimatedDelivery": "25-35 min",
     "confirmationCode": "705347",
     "confirmedAt": 1777823519502
+  },
+  {
+    "id": "ord_1777823807801_5fzmy5114",
+    "items": [
+      {
+        "id": "p3",
+        "name": {
+          "de": "Tonno",
+          "ru": "Тонно"
+        },
+        "size": "32",
+        "price": 16,
+        "quantity": 1,
+        "toppings": [
+          {
+            "id": "t1",
+            "name": {
+              "de": "Extra Käse",
+              "ru": "Доп. сыр"
+            },
+            "price": 1.5
+          },
+          {
+            "id": "t2",
+            "name": {
+              "de": "Oliven",
+              "ru": "Оливки"
+            },
+            "price": 1
+          }
+        ],
+        "image": "/images/p3_pizza_tonno.webp"
+      },
+      {
+        "id": "pas2",
+        "name": {
+          "de": "Pasta Bolognese",
+          "ru": "Паста Болоньезе"
+        },
+        "size": "300gr",
+        "price": 10.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/pas2_pasta_bolo.webp"
+      },
+      {
+        "id": "d1",
+        "name": {
+          "de": "Coca Cola 0,5L",
+          "ru": "Кока-Кола 0,5л"
+        },
+        "size": "1 Stück",
+        "price": 2.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/d1_cola.webp"
+      }
+    ],
+    "customer": {
+      "name": "Kjhj 6",
+      "phone": "0125447885",
+      "address": "Kjhj 6, 57072 Siegen",
+      "note": "Eden dooming 18-00"
+    },
+    "total": 29.799999999999997,
+    "subtotal": 29.799999999999997,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "pending_confirmation",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777823807801,
+        "note": "Order pending confirmation"
+      }
+    ],
+    "createdAt": 1777823807801,
+    "updatedAt": 1777823807801,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "702251"
   }
 ]
