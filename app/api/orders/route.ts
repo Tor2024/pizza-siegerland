@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { saveOrder, getOrder } from '@/lib/githubStorage';
 import { findUserByEmail, addUser, addOrderToUser } from '@/lib/userStorage';
-import { Resend } from 'resend';
 
 // In-memory cache for fast access
 const orderCache = new Map<string, any>();
@@ -79,14 +78,20 @@ export async function POST(req: Request) {
     // Send confirmation email
     if (orderData.customer?.email) {
       try {
-        const resend = new Resend(process.env.RESEND_API_KEY);
+        const apiKey = process.env.RESEND_API_KEY;
         const confirmUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-siegerland.vercel.app'}/order/confirm?token=${confirmationToken}`;
         
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM || 'Pizza Roma <noreply@pizza-roma.de>',
-          to: [orderData.customer.email],
-          subject: `🍕 Bestätigen Sie Ihre Bestellung #${orderId.slice(-8)}`,
-          html: `
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: process.env.EMAIL_FROM || 'Pizza Roma <noreply@pizza-roma.de>',
+            to: [orderData.customer.email],
+            subject: `🍕 Bestätigen Sie Ihre Bestellung #${orderId.slice(-8)}`,
+            html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
               <h1 style="color: #c41e3a;">Pizza Roma - Bestellung bestätigen</h1>
               <p>Hallo ${orderData.customer.name},</p>
@@ -118,6 +123,7 @@ export async function POST(req: Request) {
               </p>
             </div>
           `,
+          }),
         });
         console.log(`📧 Confirmation email sent to ${orderData.customer.email}`);
       } catch (emailError) {

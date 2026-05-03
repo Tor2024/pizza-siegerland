@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,19 +8,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'Pizza Roma <noreply@pizza-roma.de>',
-      to: [to],
-      subject,
-      html,
-    });
-
-    if (error) {
-      console.error('Resend error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error('RESEND_API_KEY not configured');
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, data });
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: process.env.EMAIL_FROM || 'Pizza Roma <noreply@pizza-roma.de>',
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error('Resend API error:', result);
+      return NextResponse.json({ error: result.message || 'Failed to send email' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error('Email send error:', error);
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
