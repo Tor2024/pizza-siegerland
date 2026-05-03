@@ -71,10 +71,21 @@ export function proxy(request: NextRequest) {
 
   // Check admin auth for protected paths
   if (isProtectedPath(pathname) && !EXCLUDED_PATHS.some(p => pathname.startsWith(p))) {
-    const authHeader = request.headers.get('authorization');
     const adminSecret = process.env.ADMIN_SECRET;
     
-    if (!authHeader || authHeader !== `Bearer ${adminSecret}`) {
+    // Check Authorization header (for API routes)
+    const authHeader = request.headers.get('authorization');
+    
+    // Check cookie (for page routes)
+    const cookieHeader = request.headers.get('cookie') || '';
+    const tokenMatch = cookieHeader.match(/admin_token=([^;]+)/);
+    const cookieToken = tokenMatch ? tokenMatch[1] : null;
+    
+    // Valid if either Authorization header OR cookie is valid
+    const isAuthenticated = (authHeader && authHeader === `Bearer ${adminSecret}`) || 
+                         (cookieToken && cookieToken === adminSecret);
+    
+    if (!isAuthenticated) {
       // For API routes, return 401
       if (pathname.startsWith('/api/')) {
         return NextResponse.json(
