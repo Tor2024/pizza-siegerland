@@ -135,6 +135,55 @@ export async function POST(req: Request) {
     await saveOrder(newOrder);
     orderCache.set(orderId, newOrder);
 
+    // Send Telegram notification if configured
+    try {
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      if (botToken && chatId) {
+        const mapsLink = `https://www.google.com/maps/dir/?api=1&origin=my+location&destination=${encodeURIComponent(newOrder.customer.address)}&travelmode=driving`;
+        const routeLink = newOrder.deliveryRoute?.maps_url || '';
+        const itemsText = newOrder.items.map((i: any) => `  ${i.quantity}x ${i.name.de} (${i.size || ''}) - ${(i.price * i.quantity).toFixed(2)}€`).join('\n');
+        let message = `🍕 NEW ORDER #${newOrder.id.slice(-8)}\n`;
+        message += `👤 ${newOrder.customer.name}\n`;
+        message += `📞 ${newOrder.customer.phone}\n`;
+        message += `📍 ${newOrder.customer.address}\n`;
+        if (newOrder.customer.email) message += `✉️ ${newOrder.customer.email}\n`;
+        message += `📝 Note: ${newOrder.customer.note || 'None'}\n\n`;
+        message += `🍕 Items:\n${itemsText}\n\n`;
+        message += `💰 Total: ${newOrder.total.toFixed(2)}€ (Subtotal: ${newOrder.subtotal.toFixed(2)}€, Delivery: ${newOrder.deliveryFee.toFixed(2)}€)\n`;
+        if (newOrder.promoCode) message += `🎫 Promo: ${newOrder.promoCode} (-${newOrder.promoDiscount?.toFixed(2)}€)\n`;
+        message += `⏱ Estimated delivery: ${newOrder.estimatedDelivery}\n`;
+        if (newOrder.addressValid === false) message += `⚠️ Address invalid: ${newOrder.addressMessage}\n`;
+        if (newOrder.addressValid === true) message += `✅ Address verified\n`;
+        if (newOrder.deliveryRoute) {
+          message += `🚚 Duration: ${newOrder.deliveryRoute.duration?.text || 'N/A'}\n`;
+          message += `📏 Distance: ${newOrder.deliveryRoute.distance?.text || 'N/A'}\n`;
+        }
+        message += `🗺️ Route (current location → address): ${mapsLink}\n`;
+        if (routeLink) message += `🗺️ Route (pizzeria → address): ${routeLink}\n`;
+
+        const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+        const telegramResponse = await fetch(telegramUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML',
+            disable_web_page_preview: false
+          })
+        });
+        const telegramResult = await telegramResponse.json();
+        if (!telegramResult.ok) {
+          console.error('Telegram send error:', telegramResult);
+        } else {
+          console.log(`📱 Telegram notification sent for order ${newOrder.id}`);
+        }
+      }
+    } catch (telegramError) {
+      console.error('Telegram notification error:', telegramError);
+    }
+
     // Привязываем заказ к пользователю (по email)
     if (orderData.customer?.email) {
       try {
