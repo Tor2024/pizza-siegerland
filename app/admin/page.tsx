@@ -815,10 +815,35 @@ export default function AdminDashboard() {
                   </div>
                 ) : menuData ? (
                   <div className="space-y-4">
-                    {/* Delivery settings */}
-                    <div className={`rounded-xl p-4 ${isDarkMode ? 'bg-black/20' : 'bg-gray-100'}`}>
-                      <h3 className={`font-semibold mb-3 ${isDarkMode ? '' : 'text-gray-900'}`}>Lieferungseinstellungen</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                     {/* Delivery settings */}
+                     <div className={`rounded-xl p-4 ${isDarkMode ? 'bg-black/20' : 'bg-gray-100'}`}>
+                       <h3 className={`font-semibold mb-3 ${isDarkMode ? '' : 'text-gray-900'}`}>Lieferungseinstellungen</h3>
+                       
+                       {/* Google Maps API Key */}
+                       <div className="md:col-span-4 mb-4">
+                         <label className={`text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-600'}`}>Google Maps API Key</label>
+                         <input 
+                           type="text" 
+                           value={menuData?.settings?.googleMapsApiKey || ''} 
+                           onChange={(e) => {
+                             if (!menuData) return;
+                             const newMenuData: MenuData = JSON.parse(JSON.stringify(menuData));
+                             if (!newMenuData.settings) newMenuData.settings = { delivery: { minOrder: 15, freeDeliveryThreshold: 25, deliveryFee: 3.5, estimatedTime: '25-35 Min' } };
+                             newMenuData.settings.googleMapsApiKey = e.target.value;
+                             setMenuData(newMenuData);
+                           }} 
+                           className={`w-full rounded-lg px-3 py-2 mt-1 text-sm ${isDarkMode ? 'bg-white/10 text-white' : 'bg-white text-gray-900 border border-gray-300'}`} 
+                           placeholder="Enter Google Maps API Key"
+                           title="Google Maps API Key for address validation"
+                         />
+                         <p className={`text-xs mt-1 ${isDarkMode ? 'text-white/40' : 'text-gray-500'}`}>
+                           <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener" className="text-roma-gold hover:underline">
+                             Get API key here ↗
+                           </a>
+                         </p>
+                       </div>
+                       
+                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
                           <label className={`text-sm ${isDarkMode ? 'text-white/60' : 'text-gray-600'}`}>Min. Bestellung (€)</label>
                           <input type="number" step="0.1" value={menuData?.settings?.delivery?.minOrder || 15} onChange={(e) => {

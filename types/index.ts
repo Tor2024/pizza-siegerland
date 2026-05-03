@@ -27,7 +27,7 @@ export interface Category {
   items: MenuItem[];
 }
 
-export interface MenuData {
+  export interface MenuData {
   categories?: { [key: string]: Category };
   offers?: Offer[];
   settings?: {
@@ -37,6 +37,7 @@ export interface MenuData {
       deliveryFee?: number;
       estimatedTime?: string;
     };
+    googleMapsApiKey?: string;
     hours?: {
       mon_thu?: string;
       fri_sat?: string;

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { saveOrder, getOrder } from '@/lib/githubStorage';
+import { findUserByEmail, addUser, addOrderToUser } from '@/lib/userStorage';
 
 // In-memory cache for fast access
 const orderCache = new Map<string, any>();
@@ -45,6 +46,32 @@ export async function POST(req: Request) {
     // Сохраняем заказ в GitHub (persistent) и cache
     await saveOrder(newOrder);
     orderCache.set(orderId, newOrder);
+
+    // Привязываем заказ к пользователю (по email)
+    if (orderData.customer?.email) {
+      try {
+        let user = await findUserByEmail(orderData.customer.email);
+        if (!user) {
+          // Создаем нового пользователя
+          user = {
+            id: `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+            email: orderData.customer.email,
+            name: orderData.customer.name,
+            phone: orderData.customer.phone,
+            address: orderData.customer.address,
+            createdAt: Date.now(),
+            orders: [orderId]
+          };
+          await addUser(user);
+        } else {
+          // Добавляем заказ к существующему пользователю
+          await addOrderToUser(orderData.customer.email, orderId);
+        }
+      } catch (userError) {
+        console.error('User processing error:', userError);
+        // Не прерываем создание заказа, если работа с юзером не удалась
+      }
+    }
 
     // Отправляем уведомление админу (заглушка для future webhook)
     console.log(`🍕 New order received: ${orderId} - ${orderData.customer.name} - ${orderData.total}€`);
