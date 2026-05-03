@@ -42,11 +42,11 @@ export function useMenuRefresh(refreshInterval: number = 30000) { // 30 seconds
     }
   }, []);
 
-  // Auto-refresh on interval
-  useEffect(() => {
-    const interval = setInterval(refreshMenu, refreshInterval);
-    return () => clearInterval(interval);
-  }, [refreshInterval, refreshMenu]);
+  // Auto-refresh on interval (disabled to prevent issues)
+  // useEffect(() => {
+  //   const interval = setInterval(refreshMenu, refreshInterval);
+  //   return () => clearInterval(interval);
+  // }, [refreshInterval, refreshMenu]);
 
   // Refresh when page becomes visible (user returns to tab)
   useEffect(() => {
