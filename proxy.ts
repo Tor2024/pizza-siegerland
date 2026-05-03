@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Rate limiting (in-memory store)
-const rateLimit = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX = 30; // max 30 requests per minute per IP
-
 // Paths that require admin auth
 const PROTECTED_PATHS = [
   '/api/admin',
@@ -18,6 +13,11 @@ const RATE_LIMITED_PATHS = [
   '/api/menu'
 ];
 
+// In-memory rate limit store (note: this won't persist across serverless invocations)
+const rateLimit = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = 30; // max 30 requests per minute per IP
+
 function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PATHS.some(path => pathname.startsWith(path));
 }
@@ -27,38 +27,32 @@ function isRateLimitedPath(pathname: string): boolean {
 }
 
 function getClientIP(request: NextRequest): string {
-  // Try to get real IP from various headers
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
   const cfIP = request.headers.get('cf-connecting-ip');
-  
   if (cfIP) return cfIP;
   if (forwarded) return forwarded.split(',')[0].trim();
   if (realIP) return realIP;
-  
   return 'unknown';
 }
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
   const record = rateLimit.get(ip);
-  
   if (!record || now > record.resetTime) {
     rateLimit.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
     return true;
   }
-  
   if (record.count >= RATE_LIMIT_MAX) {
     return false;
   }
-  
   record.count++;
   return true;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Rate limiting for API endpoints
   if (isRateLimitedPath(pathname)) {
     const ip = getClientIP(request);
@@ -69,7 +63,7 @@ export function middleware(request: NextRequest) {
       );
     }
   }
-  
+
   // Check admin auth for protected paths
   if (isProtectedPath(pathname)) {
     const authHeader = request.headers.get('authorization');
@@ -87,7 +81,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
   }
-  
+
   return NextResponse.next();
 }
 
