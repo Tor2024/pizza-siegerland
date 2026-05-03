@@ -13,6 +13,12 @@ const statusMap = {
     icon: FiPackage,
     hint: '🔔 Neue Bestellung! Zutaten prüfen.' 
   },
+  confirmed: { 
+    label: 'Bestätigt', 
+    color: 'bg-teal-500', 
+    icon: FiCheckCircle,
+    hint: '✅ Per E-Mail bestätigt. Kann zubereitet werden.' 
+  },
   preparing: { 
     label: 'In Zubereitung', 
     color: 'bg-orange-500', 

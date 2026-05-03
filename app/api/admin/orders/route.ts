@@ -106,7 +106,7 @@ const refreshCache = async () => {
       }
 
       // Валидные статусы
-      const validStatuses: Order['status'][] = ['received', 'preparing', 'delivering', 'done', 'cancelled'];
+      const validStatuses: Order['status'][] = ['received', 'confirmed', 'preparing', 'delivering', 'done', 'cancelled'];
       if (!validStatuses.includes(newStatus as Order['status'])) {
         return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
       }
