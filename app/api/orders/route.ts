@@ -76,7 +76,9 @@ export async function POST(req: Request) {
     }
 
     // Send confirmation email with 6-digit code
-    if (orderData.customer?.email) {
+    const emailConfigured = !!process.env.RESEND_API_KEY;
+    
+    if (orderData.customer?.email && emailConfigured) {
       try {
         const apiKey = process.env.RESEND_API_KEY;
         
@@ -125,6 +127,8 @@ export async function POST(req: Request) {
       } catch (emailError) {
         console.error('Email send error:', emailError);
       }
+    } else if (!emailConfigured) {
+      console.log(`⚠️ RESEND_API_KEY not configured. Confirmation code for ${orderData.customer?.email || 'customer'}: ${confirmationCode}`);
     }
 
     // Отправляем уведомление админу (заглушка для future webhook)
@@ -133,6 +137,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ 
       success: true, 
       orderId,
+      confirmationCode: !emailConfigured ? confirmationCode : undefined, // Return code only if email not configured
       order: newOrder,
       message: 'Order created successfully'
     });
