@@ -1535,5 +1535,65 @@
     "addressValid": true,
     "customerCoords": null,
     "deliveryRoute": null
+  },
+  {
+    "id": "ord_1777887573247_ee1nycl7o",
+    "items": [
+      {
+        "id": "p1",
+        "name": {
+          "de": "Margherita Classic",
+          "ru": "Маргарита Классик"
+        },
+        "size": "47cm",
+        "price": 15.9,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p1_pizza_margherita.webp"
+      },
+      {
+        "id": "p5",
+        "name": {
+          "de": "Quattro Formaggi",
+          "ru": "Четыре сыра"
+        },
+        "size": "26 cm",
+        "price": 11.5,
+        "quantity": 1,
+        "toppings": [],
+        "image": "/images/p5_pizza_quattro.webp"
+      }
+    ],
+    "customer": {
+      "name": "Koblenzer  1",
+      "phone": "0155555666",
+      "address": "Koblenzer  1, 57072 Siegen"
+    },
+    "total": 27.4,
+    "subtotal": 27.4,
+    "deliveryFee": 0,
+    "promoCode": null,
+    "promoDiscount": 0,
+    "status": "confirmed",
+    "statusHistory": [
+      {
+        "status": "pending_confirmation",
+        "timestamp": 1777887573334,
+        "note": "Order pending confirmation"
+      },
+      {
+        "status": "confirmed",
+        "timestamp": 1777887587526,
+        "note": "Order confirmed by customer via code"
+      }
+    ],
+    "createdAt": 1777887573334,
+    "updatedAt": 1777887587526,
+    "estimatedDelivery": "25-35 min",
+    "confirmationCode": "957022",
+    "addressValid": true,
+    "customerCoords": null,
+    "deliveryRoute": null,
+    "confirmedAt": 1777887587526
   }
 ]
